@@ -18,7 +18,7 @@ POST http://localhost:8080/api/employee
     "Age": 40,
     "Namn": "Olena",
     "City": "Stockholm",
-    "Age2": 29
+    "Age2": 201
   }
 
 ### Update existing

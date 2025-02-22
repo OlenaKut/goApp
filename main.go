@@ -43,7 +43,7 @@ func apiEmployeeUpdateById(c *gin.Context) {
 		return
 	}
 	employee.Id, _ = strconv.Atoi(id)
-	if data.UpdateEmployee(employee) == nil {
+	if data.UpdateEmployee(employee) == false {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Finns inte"})
 	} else {
 		c.IndentedJSON(http.StatusOK, employee)
@@ -64,10 +64,16 @@ var config Config
 
 func main() {
 	readConfig(&config)
+
 	fmt.Println("Database file is: ")
 	fmt.Println(config.Database.File)
 
-	data.Init()
+	data.Init(config.Database.File,
+		config.Database.Server,
+		config.Database.Database,
+		config.Database.Username,
+		config.Database.Password,
+		config.Database.Port)
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/**")
@@ -79,5 +85,5 @@ func main() {
 	router.POST("/api/employee", apiEmployeeAdd)
 	router.PUT("/api/employee/:id", apiEmployeeUpdateById)
 
-	router.Run(":8080")
+	router.Run()
 }

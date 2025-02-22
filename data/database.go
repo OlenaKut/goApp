@@ -2,7 +2,9 @@ package data
 
 import (
 	"errors"
+	"fmt"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -12,6 +14,17 @@ import (
 //var employees []Employee
 
 var db *gorm.DB
+
+func openMySql(server, database, username, password string, port int) *gorm.DB {
+	url := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		username, password, server, port, database)
+
+	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	return db
+}
 
 func GetAllEmployees() []Employee {
 	var employees []Employee
@@ -29,7 +42,7 @@ func UpdateEmployee(employee Employee) *Employee {
 	dbEmployee.Namn = employee.Namn
 	dbEmployee.City = employee.City
 	db.Save(&employee)
-	return &employee
+	return true
 }
 
 func CreateNewEmployee(employee Employee) *Employee {
@@ -48,8 +61,13 @@ func GetEmployee(id int) *Employee {
 	return &employee
 }
 
-func Init() {
-	db, _ = gorm.Open(sqlite.Open("employees.sqlite"), &gorm.Config{})
+func Init(file, server, database, username, password string, port int) {
+	if len(file) == 0 {
+		db = openMySql(server, database, username, password, port)
+	} else {
+		db, _ = gorm.Open(sqlite.Open(file), &gorm.Config{})
+	}
+
 	db.AutoMigrate(&Employee{})
 
 	var antal int64
